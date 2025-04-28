@@ -108,7 +108,7 @@ class CryptoTrader:
         self.url_monitoring_lock = threading.Lock()
         self.refresh_page_lock = threading.Lock()
 
-        self.default_target_price = 0.9
+        self.default_target_price = 0.53
         self._amounts_logged = False
         # 在初始化部分添加
         self.stop_event = threading.Event()
@@ -990,7 +990,7 @@ class CryptoTrader:
         for attempt in range(retry_times):
             try:
                 # 重新定位 Spread 元素
-                keyword_element = self.driver.find_element(By.XPATH, '(//span[@class="c-ggujGL"])[2]')
+                keyword_element = self.driver.find_element(By.XPATH, XPathConfig.SPREAD[0])
                 container = keyword_element.find_element(By.XPATH, './ancestor::div[3]')
 
                 # 重新取兄弟节点
@@ -999,19 +999,28 @@ class CryptoTrader:
                 below_elements = self.driver.execute_script(
                     'let e=arguments[0],r=[];while(e=e.nextElementSibling)r.push(e);return r;', container)
 
-                # 提取上方的第一个含¢数字
+                # 提取上方的含¢数字，但跳过包含"Last"的元素
                 above_number = None # 就是asks
-                for el in above_elements:
-                    spans = el.find_elements(By.TAG_NAME, 'span')
-                    for span in spans:
-                        text = span.text.strip()
-                        if '¢' in text:
-                            match = re.search(r'\d+', text)
-                            if match:
-                                above_number = match.group(0)
-                                break
-                    if above_number:
-                        break
+                for el in above_elements: 
+                    element_text = el.text.strip()
+                    self.logger.debug(f"检查上方元素: {element_text}")
+                    
+                    # 只跳过包含"Last:"的元素，而不是包含"Last"的所有元素
+                    if "Last:" in element_text:
+                        self.logger.debug(f"跳过Last价格元素: {element_text}")
+                        continue
+                        
+                    spans = el.find_elements(By.TAG_NAME, 'span') 
+                    for span in spans: 
+                        text = span.text.strip() 
+                        if '¢' in text: 
+                            match = re.search(r'\d+', text) 
+                            if match: 
+                                above_number = match.group(0) 
+                                self.logger.debug(f"找到上方价格: {above_number}") 
+                                break 
+                    if above_number: 
+                        break 
 
                 # 提取下方的第一个含¢数字
                 below_number = None # 就是bids
@@ -1026,9 +1035,20 @@ class CryptoTrader:
                                 break
                     if below_number:
                         break
+                # 增加数据验证
+                if above_number is None or below_number is None:
+                    self.logger.warning("无法获取到价格数据")
+                    continue
+                try:
+                    above_float = float(above_number)
+                    below_float = float(below_number)
+                    return above_float, below_float
+                except ValueError:
+                    self.logger.warning("无法将价格数据转换为浮点数")
+                    continue
 
                 # 如果都找到了，就返回
-                return float(above_number), float(below_number)
+                return above_float, below_float
 
             except StaleElementReferenceException:
                 
@@ -1036,7 +1056,12 @@ class CryptoTrader:
                 continue
             except Exception as e:
                 self.logger.error(f"其他异常: {e}")
+                if attempt < retry_times - 1:
+                    time.sleep(1)
+                    continue
+                
                 break
+        return None, None
 
 
     def check_prices(self):
@@ -1060,51 +1085,53 @@ class CryptoTrader:
                 WebDriverWait(self.driver, 10).until(
                     lambda driver: driver.execute_script('return document.readyState') == 'complete'
                 )
-                self.update_status("已恢复到监控地址")
-            
+                self.update_status("已恢复到监控地址")         
             try:
                 """buy_up_price就是yes price, buy_down_price就是no price"""
                 # up = above = asks, down = below = bids
                 above_price, below_price = self.get_nearby_cents()
-
                 if above_price is not None and below_price is not None:
-                    up_price = above_price
-                    down_price = 100 -below_price
+                    try:
+                        up_price = float(above_price)
+                        down_price = 100 - float(below_price)
 
-                    up_price_dollar = up_price / 100
-                    down_price_dollar = down_price / 100
-                    
-                    # 更新价格显示
-                    self.yes_price_label.config(
-                        text=f"Up: {up_price}¢ (${up_price_dollar})",
-                        foreground='red'
-                    )
-                    self.no_price_label.config(
-                        text=f"Down: {down_price}¢ (${down_price_dollar})",
-                        foreground='red'
-                    )
-                    
-                    # 更新最后更新时间
-                    current_time = datetime.now().strftime('%H:%M:%S')
-                    self.last_update_label.config(text=f"最后更新: {current_time}")
-                    
-                    # 执行所有交易检查函数
-                    self.First_trade()
-                    self.Second_trade()
-                    self.Third_trade()
-                    self.Forth_trade()
-                    self.Sell_yes()
-                    self.Sell_no() 
+                        up_price_dollar = up_price / 100
+                        down_price_dollar = down_price / 100
+                        
+                        # 更新价格显示
+                        self.yes_price_label.config(
+                            text=f"Up: {up_price:.2f}¢ (${up_price_dollar:.2f})",
+                            foreground='red'
+                        )
+                        self.no_price_label.config(
+                            text=f"Down: {down_price:.2f}¢ (${down_price_dollar:.2f})",
+                            foreground='red'
+                        )
+                        # 更新最后更新时间
+                        current_time = datetime.now().strftime('%H:%M:%S')
+                        self.last_update_label.config(text=f"最后更新: {current_time}") 
+                        # 执行所有交易检查函数
+                        self.First_trade()
+                        self.Second_trade()
+                        self.Third_trade()
+                        self.Forth_trade()
+                        self.Sell_yes()
+                        self.Sell_no() 
+                    except ValueError as e:
+                        self.logger.error(f"价格计算错误: {ValueError}")
+                        self.update_status(f"价格数据格式错误")
                 else:
-                    self.update_status("无法获取价格数据")  
+                    self.logger.warning("无法获取价格数据")
+                    self.yes_price_label.config(text="Up: Fail", foreground='red')
+                    self.no_price_label.config(text="Down: Fail", foreground='red')  
             except Exception as e:
-                self.logger.error(f"Fail: {str(e)}")
-                self.update_status(f"Fail: {str(e)}")
-                self.yes_price_label.config(text="Yes: Fail", foreground='red')
-                self.no_price_label.config(text="No: Fail", foreground='red')
+                self.logger.error(f"价格检查失败: {str(e)}")
+                self.update_status(f"价格检查失败: {str(e)}")
+                self.yes_price_label.config(text="Up: Fail", foreground='red')
+                self.no_price_label.config(text="Down: Fail", foreground='red')
                 self.root.after(3000, self.check_prices)
         except Exception as e:
-            self.logger.error(f"检查价格失败: {str(e)}")
+            self.logger.error(f"检查价格主流程失败: {str(e)}")
             time.sleep(1)
 
     def check_balance(self):

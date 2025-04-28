@@ -162,16 +162,6 @@ class XPathConfig:
         '//button[contains(text(), "I Accept")]'
     ]    
 
-    # 实时价格,asks=buy,bids=sell
-    ASKS_PRICE = [
-        '//*[@id="event-detail-container"]/div/div[4]/div/div[3]/div/div/div[2]/span/div/div/div/div[2]/div/div/div[18]/div/div/span'
-    ]
-    
-    BIDS_PRICE = [
-        '//*[@id="event-detail-container"]/div/div[4]/div/div[3]/div/div/div[2]/span/div/div/div/div[2]/div/div/div[26]/div/div/span'
-    ]
-    
-    
     # 定位 SPREAD 的 XPATH
     SPREAD = [
         '(//span[@class="c-ggujGL"])[2]'
