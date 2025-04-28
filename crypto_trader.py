@@ -1617,7 +1617,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
 
                 # 检查Yes1价格匹配
-                if 0 <= (up_price - yes1_target ) <= 0.03 and yes1_target > 0:
+                if 0 <= (up_price - yes1_target ) <= 0.01 and yes1_target > 0:
                     while True:
                         self.logger.info("Up 1价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1679,7 +1679,7 @@ class CryptoTrader:
                             time.sleep(2)  # 添加延时避免过于频繁的重试
 
                 # 检查No1价格匹配
-                elif 0 <= ((1 - down_price) - no1_target ) <= 0.03 and no1_target > 0:
+                elif 0 <= ((1 - down_price) - no1_target ) <= 0.01 and no1_target > 0:
                     while True:
                         self.logger.info("Down 1价格匹配,执行自动交易") 
                         # 执行现有的交易操作
@@ -1763,7 +1763,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes2价格匹配
-                if 0 <= (up_price - yes2_target ) <= 0.03 and yes2_target > 0:
+                if 0 <= (up_price - yes2_target ) <= 0.01 and yes2_target > 0:
                     while True:
                         self.logger.info("Up 2价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1815,7 +1815,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No2价格匹配
-                elif 0 <= ((1 - down_price) - no2_target ) <= 0.03 and no2_target > 0:
+                elif 0 <= ((1 - down_price) - no2_target ) <= 0.01 and no2_target > 0:
                     while True:
                         self.logger.info("Down 2价格匹配,执行自动交易")
                         
@@ -1891,7 +1891,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes3价格匹配
-                if 0 <= (up_price - yes3_target ) <= 0.03 and yes3_target > 0:
+                if 0 <= (up_price - yes3_target ) <= 0.01 and yes3_target > 0:
                     while True:
                         self.logger.info("Up 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -1943,7 +1943,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No3价格匹配
-                elif 0 <= ((1 - down_price) - no3_target ) <= 0.03 and no3_target > 0:
+                elif 0 <= ((1 - down_price) - no3_target ) <= 0.01 and no3_target > 0:
                     while True:
                         self.logger.info("Down 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2019,7 +2019,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes4价格匹配
-                if 0 <= (up_price - yes4_target ) <= 0.03 and yes4_target > 0:
+                if 0 <= (up_price - yes4_target ) <= 0.01 and yes4_target > 0:
                     while True:
                         self.logger.info("Up 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2047,11 +2047,11 @@ class CryptoTrader:
                             # 设置 Yes5和No5价格为0.85
                             self.yes5_price_entry = self.yes_frame.grid_slaves(row=8, column=1)[0]
                             self.yes5_price_entry.delete(0, tk.END)
-                            self.yes5_price_entry.insert(0, "0.51")
+                            self.yes5_price_entry.insert(0, "0.98")
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
-                            self.no5_price_entry.insert(0, "0.02")
+                            self.no5_price_entry.insert(0, "0.52")
                             self.no5_price_entry.configure(foreground='red')  # 添加红色设置
 
                             # 增加交易次数
@@ -2074,7 +2074,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No4价格匹配
-                elif 0 <= ((1 - down_price) - no4_target ) <= 0.03 and no4_target > 0:
+                elif 0 <= ((1 - down_price) - no4_target ) <= 0.01 and no4_target > 0:
                     while True:
                         self.logger.info("Down 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2103,11 +2103,11 @@ class CryptoTrader:
                             # 设置 Yes5和No5价格为0.98
                             self.yes5_price_entry = self.yes_frame.grid_slaves(row=8, column=1)[0]
                             self.yes5_price_entry.delete(0, tk.END)
-                            self.yes5_price_entry.insert(0, "0.02")
+                            self.yes5_price_entry.insert(0, "0.52")
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
-                            self.no5_price_entry.insert(0, "0.51")
+                            self.no5_price_entry.insert(0, "0.98")
                             self.no5_price_entry.configure(foreground='red')  # 添加红色设置
                             
                             # 增加交易次数
