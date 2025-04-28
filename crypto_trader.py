@@ -991,7 +991,7 @@ class CryptoTrader:
             try:
                 # 重新定位 Spread 元素
                 keyword_element = self.driver.find_element(By.XPATH, XPathConfig.SPREAD[0])
-                container = keyword_element.find_element(By.XPATH, './ancestor::div[3]')
+                container = keyword_element.find_element(By.XPATH, './ancestor::div[3]') # 必须是 3 层 DIV
 
                 # 重新取兄弟节点
                 above_elements = self.driver.execute_script(
@@ -1000,14 +1000,12 @@ class CryptoTrader:
                     'let e=arguments[0],r=[];while(e=e.nextElementSibling)r.push(e);return r;', container)
 
                 # 提取上方的含¢数字，但跳过包含"Last"的元素
-                above_number = None # 就是asks
+                asks_number = None # 就是asks
                 for el in above_elements: 
                     element_text = el.text.strip()
-                    self.logger.debug(f"检查上方元素: {element_text}")
                     
                     # 只跳过包含"Last:"的元素，而不是包含"Last"的所有元素
                     if "Last:" in element_text:
-                        self.logger.debug(f"跳过Last价格元素: {element_text}")
                         continue
                         
                     spans = el.find_elements(By.TAG_NAME, 'span') 
@@ -1016,14 +1014,13 @@ class CryptoTrader:
                         if '¢' in text: 
                             match = re.search(r'\d+', text) 
                             if match: 
-                                above_number = match.group(0) 
-                                self.logger.debug(f"找到上方价格: {above_number}") 
+                                asks_number = match.group(0) 
                                 break 
-                    if above_number: 
+                    if asks_number: 
                         break 
 
                 # 提取下方的第一个含¢数字
-                below_number = None # 就是bids
+                bids_number = None # 就是bids
                 for el in below_elements:
                     spans = el.find_elements(By.TAG_NAME, 'span')
                     for span in spans:
@@ -1031,27 +1028,25 @@ class CryptoTrader:
                         if '¢' in text:
                             match = re.search(r'\d+', text)
                             if match:
-                                below_number = match.group(0)
+                                bids_number = match.group(0)
                                 break
-                    if below_number:
+                    if bids_number:
                         break
+
                 # 增加数据验证
-                if above_number is None or below_number is None:
+                if asks_number is None or bids_number is None:
                     self.logger.warning("无法获取到价格数据")
                     continue
                 try:
-                    above_float = float(above_number)
-                    below_float = float(below_number)
-                    return above_float, below_float
+                    asks_float = float(asks_number)
+                    bids_float = float(bids_number)
+                    return asks_float, bids_float
+                
                 except ValueError:
                     self.logger.warning("无法将价格数据转换为浮点数")
                     continue
 
-                # 如果都找到了，就返回
-                return above_float, below_float
-
             except StaleElementReferenceException:
-                
                 time.sleep(1)  # 稍等一下再试
                 continue
             except Exception as e:
@@ -1062,7 +1057,6 @@ class CryptoTrader:
                 
                 break
         return None, None
-
 
     def check_prices(self):
         """检查价格变化"""
@@ -1611,18 +1605,19 @@ class CryptoTrader:
     def First_trade(self):
         """第一次交易价格设置为 0.52 买入"""
         try:
-            yes_price, no_price = self.get_nearby_cents()
+            up_price, down_price = self.get_nearby_cents()
                 
-            if yes_price is not None and no_price is not None:
-                yes_price = yes_price / 100
-                no_price = no_price / 100
+            if up_price is not None and down_price is not None:
+                up_price = up_price / 100
+                down_price = down_price / 100
                 
-                # 获取Yes1和No1的目标价格
+                # 获取Yes1和No1的GUI界面上的价格
                 yes1_target = float(self.yes1_price_entry.get())
                 no1_target = float(self.no1_price_entry.get())
                 self.trading = True  # 开始交易
+
                 # 检查Yes1价格匹配
-                if 0 <= (yes_price - yes1_target ) <= 0.03 and yes1_target > 0:
+                if 0 <= (up_price - yes1_target ) <= 0.03 and yes1_target > 0:
                     while True:
                         self.logger.info("Up 1价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1684,7 +1679,7 @@ class CryptoTrader:
                             time.sleep(2)  # 添加延时避免过于频繁的重试
 
                 # 检查No1价格匹配
-                elif 0 <= ((100 - no_price) - no1_target ) <= 0.03 and no1_target > 0:
+                elif 0 <= ((1 - down_price) - no1_target ) <= 0.03 and no1_target > 0:
                     while True:
                         self.logger.info("Down 1价格匹配,执行自动交易") 
                         # 执行现有的交易操作
@@ -1756,11 +1751,11 @@ class CryptoTrader:
     def Second_trade(self):
         """处理Yes2/No2的自动交易"""
         try:
-            yes_price, no_price = self.get_nearby_cents()
+            up_price, down_price = self.get_nearby_cents()
 
-            if yes_price is not None and no_price is not None:
-                yes_price = yes_price / 100
-                no_price = no_price / 100
+            if up_price is not None and down_price is not None:
+                up_price = up_price / 100
+                down_price = down_price / 100
                 
                 # 获Yes2和No2的价格输入框
                 yes2_target = float(self.yes2_price_entry.get())
@@ -1768,7 +1763,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes2价格匹配
-                if 0 <= (yes_price - yes2_target ) <= 0.03 and yes2_target > 0:
+                if 0 <= (up_price - yes2_target ) <= 0.03 and yes2_target > 0:
                     while True:
                         self.logger.info("Up 2价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1820,7 +1815,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No2价格匹配
-                elif 0 <= ((100 - no_price) - no2_target ) <= 0.03 and no2_target > 0:
+                elif 0 <= ((1 - down_price) - no2_target ) <= 0.03 and no2_target > 0:
                     while True:
                         self.logger.info("Down 2价格匹配,执行自动交易")
                         
@@ -1884,11 +1879,11 @@ class CryptoTrader:
     def Third_trade(self):
         """处理Yes3/No3的自动交易"""
         try:
-            yes_price, no_price = self.get_nearby_cents()
+            up_price, down_price = self.get_nearby_cents()
                 
-            if yes_price is not None and no_price is not None:
-                yes_price = yes_price / 100
-                no_price = no_price / 100
+            if up_price is not None and down_price is not None:
+                up_price = up_price / 100
+                down_price = down_price / 100
                 
                 # 获取Yes3和No3的价格输入框
                 yes3_target = float(self.yes3_price_entry.get())
@@ -1896,7 +1891,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes3价格匹配
-                if 0 <= (yes_price - yes3_target ) <= 0.03 and yes3_target > 0:
+                if 0 <= (up_price - yes3_target ) <= 0.03 and yes3_target > 0:
                     while True:
                         self.logger.info("Up 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -1948,7 +1943,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No3价格匹配
-                elif 0 <= ((100 - no_price) - no3_target ) <= 0.03 and no3_target > 0:
+                elif 0 <= ((1 - down_price) - no3_target ) <= 0.03 and no3_target > 0:
                     while True:
                         self.logger.info("Down 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2012,11 +2007,11 @@ class CryptoTrader:
     def Forth_trade(self):
         """处理Yes4/No4的自动交易"""
         try:
-            yes_price, no_price = self.get_nearby_cents()
+            up_price, down_price = self.get_nearby_cents()
                 
-            if yes_price is not None and no_price is not None:
-                yes_price = yes_price / 100
-                no_price = no_price / 100
+            if up_price is not None and down_price is not None:
+                up_price = up_price / 100
+                down_price = down_price / 100
                 
                 # 获取Yes4和No4的价格输入框
                 yes4_target = float(self.yes4_price_entry.get())
@@ -2024,7 +2019,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes4价格匹配
-                if 0 <= (yes_price - yes4_target ) <= 0.03 and yes4_target > 0:
+                if 0 <= (up_price - yes4_target ) <= 0.03 and yes4_target > 0:
                     while True:
                         self.logger.info("Up 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2079,7 +2074,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No4价格匹配
-                elif 0 <= ((100 - no_price) - no4_target ) <= 0.03 and no4_target > 0:
+                elif 0 <= ((1 - down_price) - no4_target ) <= 0.03 and no4_target > 0:
                     while True:
                         self.logger.info("Down 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2148,16 +2143,18 @@ class CryptoTrader:
             if not self.driver:
                 self.restart_browser()
                 
-            yes_price, no_price = self.get_nearby_cents()
-            if yes_price is not None:
-                yes_price = yes_price / 100
+            up_price, down_price = self.get_nearby_cents()
+
+            if up_price is not None:
+                up_price = up_price / 100
+                down_price = down_price / 100
                 
                 # 获取Yes5价格
                 yes5_target = float(self.yes5_price_entry.get())
                 self.trading = True  # 开始交易
 
                 # 检查Yes5价格匹配
-                if 0 <= (no_price - yes5_target) <= 0.01 and yes5_target > 0:
+                if 0 <= (yes5_target - down_price) <= 0.01 and yes5_target > 0:
                     self.logger.info("Up 5价格匹配,执行自动卖出")
                     while True:
                         # 执行卖出YES操作
@@ -2198,17 +2195,18 @@ class CryptoTrader:
             if not self.driver:
                 self.restart_browser()  
 
-            yes_price, no_price = self.get_nearby_cents()
+            up_price, down_price = self.get_nearby_cents()
                 
-            if no_price is not None:
-                no_price = no_price / 100
+            if down_price is not None:
+                down_price = down_price / 100
+                up_price = up_price / 100
                 
                 # 获取No5价格
                 no5_target = float(self.no5_price_entry.get())
                 self.trading = True  # 开始交易
             
                 # 检查No5价格匹配
-                if 0 <= ((100 - yes_price) - no5_target) <= 0.01 and no5_target > 0:
+                if 0 <= (no5_target - (1 - up_price)) <= 0.01 and no5_target > 0:
                     self.logger.info("Down 5价格匹配,执行自动卖出")
                     while True:
                         # 卖完 Down 后，自动再卖 Up                      
@@ -2260,29 +2258,7 @@ class CryptoTrader:
 
     def only_sell_yes(self):
         """只卖出YES"""
-        # 获取当前价格
-        prices = self.driver.execute_script("""
-                function getPrices() {
-                    const prices = {yes: null, no: null};
-                    const elements = document.getElementsByTagName('span');
-                    
-                    for (let el of elements) {
-                        const text = el.textContent.trim();
-                        if (text.includes('Up') && text.includes('¢')) {
-                            const match = text.match(/(\\d+\\.?\\d*)¢/);
-                            if (match) prices.yes = parseFloat(match[1]);
-                        }
-                        if (text.includes('Down') && text.includes('¢')) {
-                            const match = text.match(/(\\d+\\.?\\d*)¢/);
-                            if (match) prices.no = parseFloat(match[1]);
-                        }
-                    }
-                    return prices;
-                }
-                return getPrices();
-            """)
-        yes_price = float(prices['yes']) / 100 if prices['yes'] else 0
-
+        
         self.position_sell_yes_button.invoke()
         time.sleep(0.5)
         self.sell_confirm_button.invoke()
@@ -2317,29 +2293,6 @@ class CryptoTrader:
        
     def only_sell_no(self):
         """只卖出Down"""
-        # 获取当前价格
-        prices = self.driver.execute_script("""
-                function getPrices() {
-                    const prices = {yes: null, no: null};
-                    const elements = document.getElementsByTagName('span');
-                    
-                    for (let el of elements) {
-                        const text = el.textContent.trim();
-                        if (text.includes('Up') && text.includes('¢')) {
-                            const match = text.match(/(\\d+\\.?\\d*)¢/);
-                            if (match) prices.yes = parseFloat(match[1]);
-                        }
-                        if (text.includes('Down') && text.includes('¢')) {
-                            const match = text.match(/(\\d+\\.?\\d*)¢/);
-                            if (match) prices.no = parseFloat(match[1]);
-                        }
-                    }
-                    return prices;
-                }
-                return getPrices();
-            """)
-        no_price = float(prices['no']) / 100 if prices['no'] else 0
-
         self.position_sell_no_button.invoke()
         time.sleep(0.5)
         self.sell_confirm_button.invoke()
