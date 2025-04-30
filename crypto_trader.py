@@ -39,31 +39,30 @@ class Logger:
     def __init__(self, name):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
-        # 如果logger已经有处理器，则不再添加新的处理器
-        if not self.logger.handlers:
-            # 创建logs目录（如果不存在）
-            if not os.path.exists('logs'):
-                os.makedirs('logs')
-                
-            # 设置日志文件名（使用当前日期）
-            log_filename = f"logs/{datetime.now().strftime('%Y%m%d')}.log"
+        
+        # 创建logs目录（如果不存在）
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
             
-            # 创建文件处理器
-            file_handler = logging.FileHandler(log_filename, encoding='utf-8')
-            file_handler.setLevel(logging.DEBUG)
-            
-            # 创建控制台处理器
-            console_handler = logging.StreamHandler()
-            console_handler.setLevel(logging.DEBUG)
-            
-            # 创建格式器
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            file_handler.setFormatter(formatter)
-            console_handler.setFormatter(formatter)
-            
-            # 添加处理器到logger
-            self.logger.addHandler(file_handler)
-            self.logger.addHandler(console_handler)
+        # 设置日志文件名（使用当前日期）
+        log_filename = f"logs/{datetime.now().strftime('%Y%m%d')}.log"
+        
+        # 创建文件处理器
+        file_handler = logging.FileHandler(log_filename, encoding='utf-8')
+        file_handler.setLevel(logging.DEBUG)
+        
+        # 创建控制台处理器
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        
+        # 创建格式器
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
+        
+        # 添加处理器到logger
+        self.logger.addHandler(file_handler)
+        self.logger.addHandler(console_handler)
     
     def debug(self, message):
         self.logger.debug(message)
@@ -113,7 +112,6 @@ class CryptoTrader:
         self._amounts_logged = False
         # 在初始化部分添加
         self.stop_event = threading.Event()
-
         # 初始化金额属性
         for i in range(1, 4):  # 1到4
             setattr(self, f'yes{i}_amount', 0.0)
@@ -725,7 +723,7 @@ class CryptoTrader:
         self.sell_confirm_button = ttk.Button(button_frame, text="Sell-confirm", width=10,
                                            command=self.click_sell_confirm_button)
         self.sell_confirm_button.grid(row=0, column=2, padx=2, pady=5)
-        
+ 
         # 配置列权重使按钮均匀分布
         for i in range(4):
             button_frame.grid_columnconfigure(i, weight=1)
@@ -781,9 +779,6 @@ class CryptoTrader:
         self.root.after(4000, self.start_url_monitoring)
         # 启动自动切换url
         self.root.after(90000, self.schedule_00_02_change_url)
-
-        # 启动 XPath 监控
-        self.monitor_xpath_timer = self.root.after(120000, self.monitor_xpath_elements)
 
     def _start_browser_monitoring(self, new_url):
         """在新线程中执行浏览器操作"""
@@ -1599,13 +1594,6 @@ class CryptoTrader:
         else:
             self.logger.info("没有检测到ACCEPT弹窗")
             return False
-    
-    def refocus_and_accept(self):
-        """确保焦点在浏览器，然后按下回车接受弹窗"""
-        # 点击浏览器窗口空白区域，把焦点切回去
-        pyautogui.click(x=1180, y=700)
-        time.sleep(0.5)
-        pyautogui.press('enter')
 
     def First_trade(self):
         """第一次交易价格设置为 0.52 买入"""
@@ -1622,7 +1610,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
 
                 # 检查Yes1价格匹配
-                if 0 <= (up_price - yes1_target ) <= 0.02 and yes1_target > 0:
+                if 0 <= (up_price - yes1_target ) <= 0.01 and yes1_target > 0:
                     while True:
                         self.logger.info("Up 1价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1633,7 +1621,7 @@ class CryptoTrader:
                         
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
-                            self.refocus_and_accept()
+                            pyautogui.press('enter')
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                             time.sleep(1)
                             self.buy_confirm_button.invoke()
@@ -1684,7 +1672,7 @@ class CryptoTrader:
                             time.sleep(2)  # 添加延时避免过于频繁的重试
 
                 # 检查No1价格匹配
-                elif 0 <= ((1 - down_price) - no1_target ) <= 0.02 and no1_target > 0:
+                elif 0 <= ((1 - down_price) - no1_target ) <= 0.01 and no1_target > 0:
                     while True:
                         self.logger.info("Down 1价格匹配,执行自动交易") 
                         # 执行现有的交易操作
@@ -1697,8 +1685,7 @@ class CryptoTrader:
                         
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
-                            self.refocus_and_accept()
-                            time.sleep(0.5)
+                            pyautogui.press('enter')
                             
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                             time.sleep(1)
@@ -1768,7 +1755,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes2价格匹配
-                if 0 <= (up_price - yes2_target ) <= 0.02 and yes2_target > 0:
+                if 0 <= (up_price - yes2_target ) <= 0.01 and yes2_target > 0:
                     while True:
                         self.logger.info("Up 2价格匹配,执行自动交易")
                         # 执行现有的交易操作
@@ -1779,8 +1766,7 @@ class CryptoTrader:
                         
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
-                            self.refocus_and_accept()
-                            time.sleep(0.5)
+                            pyautogui.press('enter')
                             
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                             time.sleep(1)
@@ -1820,7 +1806,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No2价格匹配
-                elif 0 <= ((1 - down_price) - no2_target ) <= 0.02 and no2_target > 0:
+                elif 0 <= ((1 - down_price) - no2_target ) <= 0.01 and no2_target > 0:
                     while True:
                         self.logger.info("Down 2价格匹配,执行自动交易")
                         
@@ -1835,8 +1821,7 @@ class CryptoTrader:
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
                             time.sleep(0.5)
-                            self.refocus_and_accept()
-                            time.sleep(1)
+                            pyautogui.press('enter')
                             self.buy_confirm_button.invoke()
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                        
@@ -1896,7 +1881,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes3价格匹配
-                if 0 <= (up_price - yes3_target ) <= 0.02 and yes3_target > 0:
+                if 0 <= (up_price - yes3_target ) <= 0.01 and yes3_target > 0:
                     while True:
                         self.logger.info("Up 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -1908,8 +1893,7 @@ class CryptoTrader:
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
                             time.sleep(0.5)
-                            self.refocus_and_accept()
-                            time.sleep(1)
+                            pyautogui.press('enter')
                             self.buy_confirm_button.invoke()
                             self.logger.info("✅ 点击 ACCEPT 完成")
                     
@@ -1948,7 +1932,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No3价格匹配
-                elif 0 <= ((1 - down_price) - no3_target ) <= 0.02 and no3_target > 0:
+                elif 0 <= ((1 - down_price) - no3_target ) <= 0.01 and no3_target > 0:
                     while True:
                         self.logger.info("Down 3价格匹配,执行自动交易")
                         # 执行交易操作
@@ -1962,8 +1946,7 @@ class CryptoTrader:
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
                             time.sleep(0.5)
-                            self.refocus_and_accept()
-                            time.sleep(1)
+                            pyautogui.press('enter')
                             self.buy_confirm_button.invoke()
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                         
@@ -2024,7 +2007,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
             
                 # 检查Yes4价格匹配
-                if 0 <= (up_price - yes4_target ) <= 0.02 and yes4_target > 0:
+                if 0 <= (up_price - yes4_target ) <= 0.01 and yes4_target > 0:
                     while True:
                         self.logger.info("Up 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2035,8 +2018,7 @@ class CryptoTrader:
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
                             time.sleep(0.5)
-                            self.refocus_and_accept()
-                            time.sleep(1)
+                            pyautogui.press('enter')
                             self.buy_confirm_button.invoke()
                             self.logger.info("✅ 点击 ENTER 完成")
                       
@@ -2079,7 +2061,7 @@ class CryptoTrader:
                             self.logger.warning("交易失败,等待2秒后重试")
                             time.sleep(2)  # 添加延时避免过于频繁的重试
                 # 检查No4价格匹配
-                elif 0 <= ((1 - down_price) - no4_target ) <= 0.02 and no4_target > 0:
+                elif 0 <= ((1 - down_price) - no4_target ) <= 0.01 and no4_target > 0:
                     while True:
                         self.logger.info("Down 4价格匹配,执行自动交易")
                         # 执行交易操作
@@ -2092,8 +2074,7 @@ class CryptoTrader:
                         if self.is_buy_accept():
                             # 点击 "Accept" 按钮
                             time.sleep(0.5)
-                            self.refocus_and_accept()
-                            time.sleep(1)
+                            pyautogui.press('enter')
                             self.buy_confirm_button.invoke()
                             self.logger.info("\033[34m✅ 点击 ENTER 完成\033[0m")
                     
@@ -2159,7 +2140,7 @@ class CryptoTrader:
                 self.trading = True  # 开始交易
 
                 # 检查Yes5价格匹配
-                if 0 <= (yes5_target - down_price) <= 0.02 and yes5_target > 0:
+                if 0 <= (yes5_target - down_price) <= 0.01 and yes5_target > 0:
                     self.logger.info("Up 5价格匹配,执行自动卖出")
                     while True:
                         # 执行卖出YES操作
@@ -2271,8 +2252,7 @@ class CryptoTrader:
 
         if self.is_sell_accept():
             # 点击 "Accept" 按钮
-            self.refocus_and_accept()
-            time.sleep(1)
+            pyautogui.press('enter')
             self.sell_confirm_button.invoke()
             self.logger.info("\033[34m✅ 点击 ACCEPT 完成\033[0m")
 
@@ -2305,8 +2285,7 @@ class CryptoTrader:
 
         if self.is_sell_accept():
             # 点击 "Accept" 按钮
-            self.refocus_and_accept()
-            time.sleep(1)
+            pyautogui.press('enter')
             self.sell_confirm_button.invoke()
             self.logger.info("\033[34m✅ 点击 ACCEPT 完成\033[0m")
         
@@ -3148,7 +3127,7 @@ class CryptoTrader:
         """安排每天0点2分执行自动找币"""
         now = datetime.now()
         # 计算下一个0点2分的时间
-        next_run = now.replace(hour=4, minute=2, second=0, microsecond=0)
+        next_run = now.replace(hour=3, minute=2, second=0, microsecond=0)
         if now >= next_run:
             next_run += timedelta(days=1)
         
@@ -3243,73 +3222,6 @@ class CryptoTrader:
         self.logger.info("没有找到包含元素的 iframe")
         return False
 
-    # 在 CryptoTrader 类中添加方法
-    def monitor_xpath_elements(self):
-        """使用当前浏览器实例监控 XPath 元素"""
-        if not self.driver:
-            self.logger.warning("浏览器未启动，无法监控 XPath")
-            return
-            
-        try:
-            # 获取 XPathConfig 中的所有属性
-            xpath_config = XPathConfig()
-            # 定义要排除的 XPath 属性
-            excluded_attrs = ['ACCEPT_BUTTON', 'LOGIN_BUTTON', 'LOGIN_WITH_GOOGLE_BUTTON']
-            # 获取所有 XPath 属性，排除指定的属性
-            xpath_attrs = [attr for attr in dir(xpath_config) 
-                        if not attr.startswith('__') 
-                        and isinstance(getattr(xpath_config, attr), list)
-                        and attr not in excluded_attrs]
-            failed_xpaths = []
-            
-            # 只检查每个 XPath 列表的第一个元素
-            for attr in xpath_attrs:
-                xpath_list = getattr(xpath_config, attr)
-                if xpath_list:  # 确保列表不为空
-                    first_xpath = xpath_list[0]  # 只获取第一个 XPath
-                    try:
-                        # 尝试定位元素，设置超时时间为 5 秒
-                        WebDriverWait(self.driver, 5).until(
-                            EC.presence_of_element_located((By.XPATH, first_xpath))
-                        )
-                        self.logger.info(f"✅ {attr} 定位成功: {first_xpath}")
-                    except (TimeoutException, NoSuchElementException):
-                        self.logger.warning(f"❌ {attr} 定位失败: {first_xpath}")
-                        failed_xpaths.append((attr, first_xpath))
-            
-            # 如果有失败的 XPath，发送邮件
-            if failed_xpaths:
-                subject = f"⚠️ XPath 监控警告: {len(failed_xpaths)} 个 XPath 定位失败"
-                body = "以下 XPath 无法正常定位到元素:\n\n"
-                
-                for name, xpath in failed_xpaths:
-                    body += f"{name}: {xpath}\n"
-                
-                body += "\n请尽快检查并更新 xpath_config.py 文件。"
-                
-                # 使用 send_trade_email 方法发送邮件
-                self.send_trade_email(
-                                trade_type="XPATH检查",
-                                price=0,
-                                amount=0,
-                                trade_count=0,
-                                cash_value=0,
-                                portfolio_value=0,
-                                sell_profit_rate=subject,
-                                buy_profit_rate=body
-                            )
-                
-                self.logger.warning(f"发现 {len(failed_xpaths)} 个 XPath 定位失败，已发送邮件通知")
-            else:
-                self.logger.info("所有 XPath 定位正常")
-        
-        except Exception as e:
-            self.logger.error(f"监控 XPath 元素时发生错误: {str(e)}")
-        finally:
-            # 每隔 30 分钟检查一次,先关闭之前的定时器
-            self.root.after_cancel(self.monitor_xpath_timer)
-            self.root.after(1800000, self.monitor_xpath_elements)
-   
     def run(self):
         """启动程序"""
         try:
