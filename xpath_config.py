@@ -110,14 +110,14 @@ class XPathConfig:
 
     # 18.Portfolio值长期有效
     PORTFOLIO_VALUE = [
-        '//button[@href="/portfolio"]//p[contains(text(), "$")]',
-        '//a[@href="/portfolio"]//span[contains(text(), "$")]'
+        '//a[@href="/portfolio"]//div//p[contains(text(), "$")]',
+        '//button[@href="/portfolio"]//p[contains(text(), "$")]'
     ]
 
     # 19.Cash值长期有效
     CASH_VALUE = [
-        '//button[.//p[text()="Cash"]]/p[contains(text(), "$")]',
-        '//button[.//span[text()="Cash"]]/span[contains(text(), "$")]'
+        '//a[@href="/portfolio"]//button//p[contains(text(), "$")]',
+        '//button[.//p[text()="Cash"]]/p[contains(text(), "$")]'
     ]
 
     # 20.History-交易记录长期有效
