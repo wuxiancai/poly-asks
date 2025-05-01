@@ -2948,8 +2948,7 @@ class CryptoTrader:
                 # 修复格式化字符串问题，确保cash_value和portfolio_value是字符串
                 str_cash_value = str(cash_value)
                 str_portfolio_value = str(portfolio_value)
-                sell_profit_rate_float = float(sell_profit_rate)
-                buy_profit_rate_float = float(buy_profit_rate)
+                
                 content = f"""
                 交易价格: ${price:.2f}
                 交易金额: ${amount:.2f}
@@ -2957,8 +2956,8 @@ class CryptoTrader:
                 当前卖出次数: {self.sell_count}
                 当前 CASH 值: {str_cash_value}
                 当前 PORTFOLIO 值: {str_portfolio_value}
-                卖出利润率: {sell_profit_rate_float:.2f}%
-                买入利润率: {buy_profit_rate_float:.2f}%
+                卖出利润率: {sell_profit_rate:.2f}%
+                买入利润率: {buy_profit_rate:.2f}%
                 交易时间: {current_time}
                 """
                 msg.attach(MIMEText(content, 'plain', 'utf-8'))
@@ -3298,16 +3297,17 @@ class CryptoTrader:
                 
                 body += "\n请尽快检查并更新 xpath_config.py 文件。"
                 
+
                 # 使用 send_trade_email 方法发送邮件
                 self.send_trade_email(
                                 trade_type="XPATH检查",
                                 price=0,
                                 amount=0,
                                 trade_count=0,
-                                cash_value=0,
-                                portfolio_value=0,
-                                sell_profit_rate=subject,
-                                buy_profit_rate=body
+                                cash_value=subject,
+                                portfolio_value=body,
+                                sell_profit_rate=0,
+                                buy_profit_rate=0
                             )
                 
                 self.logger.warning(f"发现 {len(failed_xpaths)} 个 XPath 定位失败，已发送邮件通知")
