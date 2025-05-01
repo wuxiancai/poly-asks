@@ -1121,6 +1121,7 @@ class CryptoTrader:
                         self.update_status(f"价格数据格式错误")
                 else:
                     self.logger.warning("无法获取价格数据")
+                    self.driver.refresh()
                     self.yes_price_label.config(text="Up: Fail", foreground='red')
                     self.no_price_label.config(text="Down: Fail", foreground='red')  
             except Exception as e:
@@ -3319,7 +3320,173 @@ class CryptoTrader:
             # 每隔 30 分钟检查一次,先关闭之前的定时器
             self.root.after_cancel(self.monitor_xpath_timer)
             self.root.after(1800000, self.monitor_xpath_elements)
-   
+
+    def find_spread_element_with_scrolling(self):
+        """通过滚动查找SPREAD元素,直到找到为止"""
+        try:
+            # 首先尝试直接查找SPREAD元素
+            spread_element = self._find_element_with_retry(XPathConfig.SPREAD, timeout=2, silent=True)
+            
+            if spread_element:
+                self.logger.info("直接找到SPREAD元素")
+                return spread_element
+            
+            # 如果没找到，尝试找一个可以作为滚动参考的元素
+            scroll_reference = self._find_element_with_retry(XPathConfig.SCROLL_REFERENCE, timeout=2, silent=True)
+            
+            if not scroll_reference:
+                self.logger.error("无法找到任何可滚动的参考元素")
+                return None
+            
+            # 定义向上和向下滚动的函数
+            def scroll_down():
+                self.driver.execute_script("""
+                    var evt = new WheelEvent('wheel', {
+                        bubbles: true,
+                        cancelable: true,
+                        deltaY: 120
+                    });
+                    arguments[0].dispatchEvent(evt);
+                """, scroll_reference)
+            
+            def scroll_up():
+                self.driver.execute_script("""
+                    var evt = new WheelEvent('wheel', {
+                        bubbles: true,
+                        cancelable: true,
+                        deltaY: -120
+                    });
+                    arguments[0].dispatchEvent(evt);
+                """, scroll_reference)
+            
+            # 记录初始位置，以便需要时恢复
+            initial_location = scroll_reference.location
+            
+            # 先向下滚动几次查找
+            max_scrolls = 10
+            self.logger.info("开始向下滚动查找SPREAD元素...")
+            
+            for i in range(max_scrolls):
+                scroll_down()
+                time.sleep(0.3)  # 等待页面更新
+                
+                spread_element = self._find_element_with_retry(XPathConfig.SPREAD, timeout=1, silent=True)
+                
+                if spread_element:
+                    self.logger.info(f"向下滚动{i+1}次后找到SPREAD元素")
+                    return spread_element
+            
+            # 如果向下滚动没找到，恢复原位置
+            self.logger.info("向下滚动未找到SPREAD元素，恢复初始位置")
+            try:
+                self.driver.execute_script("arguments[0].scrollIntoView();", scroll_reference)
+                time.sleep(0.5)
+            except:
+                self.logger.warning("恢复初始位置失败，继续尝试")
+            
+            # 向上滚动查找
+            self.logger.info("开始向上滚动查找SPREAD元素...")
+            for i in range(max_scrolls):
+                scroll_up()
+                time.sleep(0.3)  # 等待页面更新
+                
+                spread_element = self._find_element_with_retry(XPathConfig.SPREAD, timeout=1, silent=True)
+                
+                if spread_element:
+                    self.logger.info(f"向上滚动{i+1}次后找到SPREAD元素")
+                    return spread_element
+            
+            self.logger.error("经过多次滚动仍未找到SPREAD元素")
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"查找SPREAD元素过程中发生错误: {str(e)}")
+            return None
+
+
+    def adjust_order_book_rows(self):
+        """调整Order Book区域,确保ASKS和BIDS区域都显示4行价格"""
+        try:
+            # 1. 查找SPREAD元素（如有必要会滚动页面）
+            spread_element = self.find_spread_element_with_scrolling()
+            
+            if not spread_element:
+                self.logger.error("无法找到SPREAD元素,无法调整Order Book显示")
+                return False
+            
+            # 2. 移动到SPREAD元素
+            actions = ActionChains(self.driver)
+            actions.move_to_element(spread_element).perform()
+            time.sleep(0.5)  # 等待鼠标移动完成
+            
+            # 3. 计算当前ASKS和BIDS的行数
+            def count_price_rows(section):
+                rows = []
+                try:
+                    for xpath in [
+                        f'//div[contains(text(), "{section}")]/..//div[contains(@class, "row")]',
+                        f'//div[text()="{section}"]/..//div[contains(@class, "price-row")]',
+                        f'//div[contains(@class, "{section.lower()}")]//div[contains(@class, "row")]'
+                    ]:
+                        rows = self.driver.find_elements_by_xpath(xpath)
+                        if rows:
+                            break
+                except Exception:
+                    pass
+                return len(rows)
+            
+            asks_count = count_price_rows("ASKS")
+            bids_count = count_price_rows("BIDS")
+            
+            self.logger.info(f"当前显示 - ASKS: {asks_count}行, BIDS: {bids_count}行")
+            
+            # 4. 如果已经平衡则无需调整
+            if asks_count == 4 and bids_count >= 2:
+                self.logger.info("价格行显示已平衡，无需调整")
+                return True
+            
+            # 5. 模拟鼠标滚轮事件调整行数
+            max_attempts = 10
+            attempts = 0
+            
+            while asks_count != 4 and attempts < max_attempts:
+                if asks_count > 4:
+                    # 向下滚动（减少ASKS行数）
+                    self.driver.execute_script("""
+                        var evt = new WheelEvent('wheel', {
+                            bubbles: true,
+                            cancelable: true,
+                            deltaY: 120
+                        });
+                        arguments[0].dispatchEvent(evt);
+                    """, spread_element)
+                else:
+                    # 向上滚动（增加ASKS行数）
+                    self.driver.execute_script("""
+                        var evt = new WheelEvent('wheel', {
+                            bubbles: true,
+                            cancelable: true,
+                            deltaY: -120
+                        });
+                        arguments[0].dispatchEvent(evt);
+                    """, spread_element)
+                
+                time.sleep(0.3)  # 等待UI更新
+                asks_count = count_price_rows("ASKS")
+                attempts += 1
+                self.logger.info(f"调整中 - ASKS: {asks_count}行 (尝试: {attempts})")
+            
+            # 6. 最终检查
+            asks_count = count_price_rows("ASKS")
+            bids_count = count_price_rows("BIDS")
+            self.logger.info(f"调整完成 - ASKS: {asks_count}行, BIDS: {bids_count}行")
+            
+            return asks_count == 4
+            
+        except Exception as e:
+            self.logger.error(f"调整价格行显示失败: {str(e)}")
+            return False
+    
     def run(self):
         """启动程序"""
         try:
