@@ -307,7 +307,7 @@ class CryptoTrader:
         style.configure('Red.TLabelframe.Label', foreground='red')  # 设置标签文本颜色为红色
         style.configure('Black.TLabel', foreground='black', font=('TkDefaultFont', 14, 'normal'))
         style.configure('Warning.TLabelframe.Label', font=('TkDefaultFont', 14, 'bold'),foreground='red', anchor='center', justify='center')
-        
+        style.configure('LeftBlack.TButton', anchor='w', foreground='black', padding=(0, 0))
         # 金额设置框架
         amount_settings_frame = ttk.LabelFrame(scrollable_frame, text="Do't be greedy, or you will lose money!", padding=(2, 5), style='Warning.TLabelframe')
         amount_settings_frame.pack(fill="x", padx=5, pady=5)
@@ -373,11 +373,11 @@ class CryptoTrader:
         ttk.Label(weeks_frame, text="Day's D", style='Red.TLabel').pack(side=tk.LEFT)
 
         # 配置列权重使输入框均匀分布
-        for i in range(8):
+        for i in range(4):
             settings_container.grid_columnconfigure(i, weight=1)
 
         """设置窗口大小和位置"""
-        window_width = 475
+        window_width = 495
         window_height = 800
         screen_width = self.root.winfo_screenwidth()
         screen_height = self.root.winfo_screenheight()
@@ -391,16 +391,9 @@ class CryptoTrader:
 
         # 创建下拉列和输入框组合控件
         ttk.Label(url_frame, text="WEB:", font=('Arial', 10)).grid(row=0, column=1, padx=5, pady=5)
-        self.url_entry = ttk.Combobox(url_frame, width=35)
+        self.url_entry = ttk.Combobox(url_frame, width=47)
         self.url_entry.grid(row=0, column=2, padx=2, pady=5, sticky="ew")
         
-        # 保存 CASH 记录
-        self.cash_label = ttk.Label(url_frame, text="Cash:", font=('Arial', 12))
-        self.cash_label.grid(row=0, column=3, padx=1, pady=5)
-        self.cash_label_value = ttk.Label(url_frame, text="0", font=('Arial', 12, 'bold'), foreground='red')
-        self.cash_label_value.grid(row=0, column=4, padx=1, pady=5)
-    
-
         # 从配置文件加载历史记录
         if 'url_history' not in self.config:
             self.config['url_history'] = []
@@ -418,19 +411,19 @@ class CryptoTrader:
         # 开始和停止按钮
         self.start_button = ttk.Button(button_frame, text="Start", 
                                           command=self.start_monitoring, width=4,
-                                          style='Black.TButton')  # 默认使用黑色文字
+                                          style='LeftBlack.TButton')  # 默认使用黑色文字
         self.start_button.pack(side=tk.LEFT, padx=1)
         
         
         self.stop_button = ttk.Button(button_frame, text="Stop", 
                                      command=self.stop_monitoring, width=4,
-                                     style='Black.TButton')  # 默认使用黑色文字
+                                     style='LeftBlack.TButton')  # 默认使用黑色文字
         self.stop_button.pack(side=tk.LEFT, padx=1)
         self.stop_button['state'] = 'disabled'
         
         # 设置金额按钮
-        self.set_amount_button = ttk.Button(button_frame, text="Set-Amount", width=12,
-                                            command=self.set_yes_no_cash,style='Black.TButton')  # 默认使用黑色文字
+        self.set_amount_button = ttk.Button(button_frame, text="Set-Amount", width=8,
+                                            command=self.set_yes_no_cash,style='LeftBlack.TButton')  # 默认使用黑色文字
         self.set_amount_button.pack(side=tk.LEFT, padx=1)
         self.set_amount_button['state'] = 'disabled'  # 初始禁用
 
@@ -438,16 +431,22 @@ class CryptoTrader:
         restart_frame = ttk.Frame(button_frame)
         restart_frame.pack(fill="x", padx=2, pady=5)
         
-        ttk.Label(restart_frame, text="Reset:", 
-                 font=('Arial', 14)).pack(side=tk.LEFT, padx=2)
-        self.reset_count_label = ttk.Label(restart_frame, text="0", 
-                                        font=('Arial', 16, 'bold'), foreground='red')
-        self.reset_count_label.pack(side=tk.LEFT, padx=2)
+        ttk.Label(restart_frame, text="Reset:").pack(side=tk.LEFT, padx=1)
+        self.reset_count_label = ttk.Label(restart_frame, text="0", foreground='red')
+        self.reset_count_label.pack(side=tk.LEFT, padx=1)
         
         # 添加日期显示
-        self.date_label = ttk.Label(restart_frame, text="--", 
-                                  font=('Arial', 14, 'bold'))
-        self.date_label.pack(side=tk.LEFT, padx=2)
+        self.date_label = ttk.Label(restart_frame, text="--")
+        self.date_label.pack(side=tk.LEFT, padx=1)
+
+        # 添加保存 CASH 记录
+        cash_frame = ttk.Frame(restart_frame)
+        cash_frame.pack(fill="x", padx=2, pady=5)
+        
+        ttk.Label(cash_frame, text="Cash:").pack(side=tk.LEFT, padx=1)
+        self.cash_label_value = ttk.Label(cash_frame, text="0", foreground='red')
+        self.cash_label_value.pack(side=tk.LEFT, padx=1)
+        
 
         # 交易币对显示区域
         pair_frame = ttk.Frame(scrollable_frame)
