@@ -134,7 +134,7 @@ class XPathConfig:
         '//button[contains(text(), "I Accept")]'
     ]    
 
-    # 定位 SPREAD 的 XPATH
+    # 22.定位 SPREAD 的 XPATH
     SPREAD = [
         '(//span[@class="c-ggujGL"])[2]'
     ]
