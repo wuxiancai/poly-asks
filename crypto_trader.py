@@ -370,7 +370,7 @@ class CryptoTrader:
         self.doubling_weeks_entry = ttk.Entry(weeks_frame, width=2, style='Red.TEntry')
         self.doubling_weeks_entry.pack(side=tk.LEFT)
         self.doubling_weeks_entry.insert(0, "44")
-        ttk.Label(weeks_frame, text="Day's D", style='Red.TLabel').pack(side=tk.LEFT)
+        ttk.Label(weeks_frame, text="Day's Double", style='Red.TLabel').pack(side=tk.LEFT)
 
         # 配置列权重使输入框均匀分布
         for i in range(4):
@@ -391,7 +391,7 @@ class CryptoTrader:
 
         # 创建下拉列和输入框组合控件
         ttk.Label(url_frame, text="WEB:", font=('Arial', 10)).grid(row=0, column=1, padx=5, pady=5)
-        self.url_entry = ttk.Combobox(url_frame, width=47)
+        self.url_entry = ttk.Combobox(url_frame, width=46)
         self.url_entry.grid(row=0, column=2, padx=2, pady=5, sticky="ew")
         
         # 从配置文件加载历史记录
@@ -1646,8 +1646,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
-                               
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             # 重置Yes1和No1价格为0.00
                             self.yes1_price_entry.delete(0, tk.END)
@@ -1711,7 +1712,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             # 重置Yes1和No1价格为0.00
                             self.yes1_price_entry.delete(0, tk.END)
@@ -1806,7 +1809,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             self.logger.info("\033[34m✅ Second_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -1860,7 +1865,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             self.logger.info("\033[34m✅ Second_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -1934,7 +1941,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )   
                             self.logger.info("\033[34m✅ Third_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -1988,7 +1997,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             self.logger.info("\033[34m✅ Third_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -2064,7 +2075,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             self.logger.info("\033[34m✅ Forth_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -2119,7 +2132,9 @@ class CryptoTrader:
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
                                 sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate()
+                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_total=self.sell_total,
+                                buy_total=self.buy_total
                             )
                             self.logger.info("\033[34m✅ Forth_trade执行成功\033[0m")
                             self.root.after(30000, self.driver.refresh)
@@ -2282,7 +2297,9 @@ class CryptoTrader:
                 cash_value=self.cash_value,
                 portfolio_value=self.portfolio_value,
                 sell_profit_rate=self.sell_profit_rate(),
-                buy_profit_rate=self.buy_profit_rate()
+                buy_profit_rate=self.buy_profit_rate(),
+                sell_total=self.sell_total,
+                buy_total=self.buy_total
             )
             
         else:
@@ -2316,7 +2333,9 @@ class CryptoTrader:
                 cash_value=self.cash_value,
                 portfolio_value=self.portfolio_value,
                 sell_profit_rate=self.sell_profit_rate(),
-                buy_profit_rate=self.buy_profit_rate()
+                buy_profit_rate=self.buy_profit_rate(),
+                sell_total=self.sell_total,
+                buy_total=self.buy_total
             )
             
         else:
@@ -2351,37 +2370,37 @@ class CryptoTrader:
                 yes4_amount = getattr(self, 'buy_yes4_amount', 0)
                 no4_amount = getattr(self, 'buy_no4_amount', 0)
                 
-                buy_yes1_first_total = yes1_amount + no2_amount + yes3_amount + no4_amount
-                buy_no1_first_total = no1_amount + yes2_amount + no3_amount + yes4_amount
+                buy_yes_first_total = yes1_amount + no2_amount + yes3_amount + no4_amount
+                buy_no_first_total = no1_amount + yes2_amount + no3_amount + yes4_amount
 
-                buy_total = 0
-                if self.buy_yes_amount:
-                    buy_total = buy_yes1_first_total
-                    self.logger.info(f"买入总额: {buy_yes1_first_total}")
-                elif self.buy_no_amount:
-                    buy_total = buy_no1_first_total
-                    self.logger.info(f"买入总额: {buy_no1_first_total}")
+                self.buy_total = 0
+                if self.buy_yes1_amount:
+                    self.buy_total = buy_yes_first_total
+                    self.logger.info(f"买入总额: {buy_yes_first_total}")
+                elif self.buy_no1_amount:
+                    self.buy_total = buy_no_first_total
+                    self.logger.info(f"买入总额: {buy_no_first_total}")
 
             except (ValueError, AttributeError) as e:
                 self.logger.warning(f"计算买入总额时出错: {str(e)}")
                 
             
             # 计算卖出总额
-            sell_total = 0
+            self.sell_total = 0
             try:
                 # 获取卖出总额,UP OR NO 卖出价格为 0.51
                 sell_yes_amount = getattr(self, 'sell_yes_amount', 0)
                 sell_no_amount = getattr(self, 'sell_no_amount', 0)
                 
-                sell_total = sell_yes_amount + sell_no_amount
-                self.logger.info(f"卖出总额:{sell_total}=卖出YES总额:{sell_yes_amount}+卖出NO总额:{sell_no_amount}")
+                self.sell_total = sell_yes_amount + sell_no_amount
+                self.logger.info(f"卖出总额:{self.sell_total}=卖出YES总额:{sell_yes_amount}+卖出NO总额:{sell_no_amount}")
                
             except (ValueError, AttributeError) as e:
                 self.logger.warning(f"计算卖出总额时出错: {str(e)}")
             
             # 计算利润和利润率
-            profit = sell_total - buy_total    
-            self.logger.info(f"利润: \033[32m{profit}\033[0m=卖出总额:\033[32m{sell_total}\033[0m-买入总额:\033[32m{buy_total}\033[0m")
+            profit = self.sell_total - self.buy_total    
+            self.logger.info(f"利润: \033[32m{profit}\033[0m=卖出总额:\033[32m{self.sell_total}\033[0m-买入总额:\033[32m{self.buy_total}\033[0m")
             total_cash = float(self.yes1_amount_entry.get()) / 0.02
             self.logger.info(f"本金:{total_cash}")
 
@@ -2917,7 +2936,9 @@ class CryptoTrader:
         except ValueError:
             self.logger.error("价格设置无效，请输入有效数字")
 
-    def send_trade_email(self, trade_type, price, amount, trade_count, cash_value, portfolio_value, sell_profit_rate, buy_profit_rate):
+    def send_trade_email(self, trade_type, price, amount, trade_count,
+                         cash_value, portfolio_value, sell_profit_rate,
+                         buy_profit_rate, sell_total, buy_total):
         """发送交易邮件"""
         max_retries = 2
         retry_delay = 2
@@ -2956,7 +2977,9 @@ class CryptoTrader:
                 当前卖出次数: {self.sell_count}
                 当前 CASH 值: {str_cash_value}
                 当前 PORTFOLIO 值: {str_portfolio_value}
+                卖出总额: {sell_total}
                 卖出利润率: {sell_profit_rate:.2f}%
+                买入总额: {buy_total}
                 买入利润率: {buy_profit_rate:.2f}%
                 交易时间: {current_time}
                 """
@@ -3261,7 +3284,7 @@ class CryptoTrader:
             # 获取 XPathConfig 中的所有属性
             xpath_config = XPathConfig()
             # 定义要排除的 XPath 属性
-            excluded_attrs = ['ACCEPT_BUTTON', 'LOGIN_BUTTON', 'LOGIN_WITH_GOOGLE_BUTTON',
+            excluded_attrs = ['ACCEPT_BUTTON', 'LOGIN_BUTTON', 'LOGIN_WITH_GOOGLE_BUTTON','HISTORY',
                               'POSITION_SELL_BUTTON', 'POSITION_SELL_YES_BUTTON', 'POSITION_SELL_NO_BUTTON',
                               'POSITION_UP_LABEL', 'POSITION_DOWN_LABEL', 'POSITION_YES_VALUE', 'POSITION_NO_VALUE'
                               ]
