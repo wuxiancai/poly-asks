@@ -2374,10 +2374,10 @@ class CryptoTrader:
                 buy_no_first_total = no1_amount + yes2_amount + no3_amount + yes4_amount
 
                 self.buy_total = 0
-                if self.buy_yes1_amount:
+                if getattr(self, 'buy_yes1_amount', 0):
                     self.buy_total = buy_yes_first_total
                     self.logger.info(f"买入总额: {buy_yes_first_total}")
-                elif self.buy_no1_amount:
+                elif getattr(self, 'buy_no1_amount', 0):
                     self.buy_total = buy_no_first_total
                     self.logger.info(f"买入总额: {buy_no_first_total}")
 
