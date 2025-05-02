@@ -1645,8 +1645,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -1711,8 +1711,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -1808,8 +1808,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -1864,8 +1864,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -1940,8 +1940,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )   
@@ -1996,8 +1996,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -2074,8 +2074,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -2131,8 +2131,8 @@ class CryptoTrader:
                                 trade_count=self.trade_count,
                                 cash_value=self.cash_value,
                                 portfolio_value=self.portfolio_value,
-                                sell_profit_rate=self.sell_profit_rate(),
-                                buy_profit_rate=self.buy_profit_rate(),
+                                sell_profit_rate=0,
+                                buy_profit_rate=0,
                                 sell_total=self.sell_total,
                                 buy_total=self.buy_total
                             )
@@ -2297,7 +2297,7 @@ class CryptoTrader:
                 cash_value=self.cash_value,
                 portfolio_value=self.portfolio_value,
                 sell_profit_rate=self.sell_profit_rate(),
-                buy_profit_rate=self.buy_profit_rate(),
+                buy_profit_rate=0,
                 sell_total=self.sell_total,
                 buy_total=self.buy_total
             )
@@ -2333,7 +2333,7 @@ class CryptoTrader:
                 cash_value=self.cash_value,
                 portfolio_value=self.portfolio_value,
                 sell_profit_rate=self.sell_profit_rate(),
-                buy_profit_rate=self.buy_profit_rate(),
+                buy_profit_rate=0,
                 sell_total=self.sell_total,
                 buy_total=self.buy_total
             )
@@ -2980,7 +2980,7 @@ class CryptoTrader:
                 卖出总额: {sell_total:.2f}
                 卖出利润率: {sell_profit_rate:.2f}%
                 买入总额: {buy_total:.2f}
-                买入利润率: {buy_profit_rate:.2f}%
+                买入利润率: {buy_profit_rate}%
                 交易时间: {current_time}
                 """
                 msg.attach(MIMEText(content, 'plain', 'utf-8'))
