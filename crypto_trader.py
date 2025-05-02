@@ -2375,10 +2375,10 @@ class CryptoTrader:
 
                 self.buy_total = 0
                 if getattr(self, 'buy_yes1_amount', 0):
-                    self.buy_total = buy_yes_first_total
+                    self.buy_total = float(buy_yes_first_total)
                     self.logger.info(f"买入总额: {buy_yes_first_total}")
                 elif getattr(self, 'buy_no1_amount', 0):
-                    self.buy_total = buy_no_first_total
+                    self.buy_total = float(buy_no_first_total)
                     self.logger.info(f"买入总额: {buy_no_first_total}")
 
             except (ValueError, AttributeError) as e:
@@ -2392,7 +2392,7 @@ class CryptoTrader:
                 sell_yes_amount = getattr(self, 'sell_yes_amount', 0)
                 sell_no_amount = getattr(self, 'sell_no_amount', 0)
                 
-                self.sell_total = sell_yes_amount + sell_no_amount
+                self.sell_total = float(sell_yes_amount) + float(sell_no_amount)
                 self.logger.info(f"卖出总额:{self.sell_total}=卖出YES总额:{sell_yes_amount}+卖出NO总额:{sell_no_amount}")
                
             except (ValueError, AttributeError) as e:
@@ -2977,9 +2977,9 @@ class CryptoTrader:
                 当前卖出次数: {self.sell_count}
                 当前 CASH 值: {str_cash_value}
                 当前 PORTFOLIO 值: {str_portfolio_value}
-                卖出总额: {sell_total}
+                卖出总额: {sell_total:.2f}
                 卖出利润率: {sell_profit_rate:.2f}%
-                买入总额: {buy_total}
+                买入总额: {buy_total:.2f}
                 买入利润率: {buy_profit_rate:.2f}%
                 交易时间: {current_time}
                 """
