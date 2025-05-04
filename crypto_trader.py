@@ -2137,6 +2137,9 @@ class CryptoTrader:
                 # 检查Yes5价格匹配
                 if 0 <= (yes5_target - down_price) <= 0.02 and yes5_target > 0:
                     self.logger.info("Up 5价格匹配,执行自动卖出")
+                    
+                    self.yes5_target_price = yes5_target
+                            
                     while True:
                         # 执行卖出YES操作
                         self.only_sell_yes()
@@ -2159,7 +2162,8 @@ class CryptoTrader:
                                 no_entry.insert(0, "0.00")
 
                         # 在所有操作完成后,重置交易
-                        self.root.after(8000, self.reset_trade)    
+                        self.root.after(1000, self.reset_trade)
+                        
                         break
                     else:
                         self.logger.warning("卖出sell_yes验证失败,重试")
@@ -2189,6 +2193,9 @@ class CryptoTrader:
                 # 检查No5价格匹配
                 if 0 <= (no5_target - (1 - up_price)) <= 0.01 and no5_target > 0:
                     self.logger.info("Down 5价格匹配,执行自动卖出")
+
+                    self.no5_target_price = no5_target
+                    
                     while True:
                         # 卖完 Down 后，自动再卖 Up                      
                         self.only_sell_no()
@@ -2211,7 +2218,8 @@ class CryptoTrader:
                                 no_entry.insert(0, "0.00")
 
                         # 在所有操作完成后,重置交易
-                        self.root.after(8000, self.reset_trade)                  
+                        self.root.after(1000, self.reset_trade)
+                        
                         break
                     else:
                         self.logger.warning("卖出sell_no验证失败,重试")
@@ -2230,7 +2238,10 @@ class CryptoTrader:
         
         self.set_yes_no_cash()
         # 重置Yes1和No1价格为0.53
+        if (self.yes5_target_price == 0.98) or (self.no5_target_price == 0.98):
+            self.reset_trade_count = 0
         self.reset_trade_count += 1
+        
         self.sell_count = 0
         self.trade_count = 0
         self.set_yes_no_default_target_price()
