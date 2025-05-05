@@ -109,7 +109,7 @@ class CryptoTrader:
         self.url_monitoring_lock = threading.Lock()
         self.refresh_page_lock = threading.Lock()
 
-        self.default_target_price = 0.53
+        self.default_target_price = 0.52
         self._amounts_logged = False
         # 在初始化部分添加
         self.stop_event = threading.Event()
@@ -1120,7 +1120,6 @@ class CryptoTrader:
                         self.update_status(f"价格数据格式错误")
                 else:
                     self.logger.warning("无法获取价格数据")
-                    
                     self.driver.refresh()
                     self.yes_price_label.config(text="Up: Fail", foreground='red')
                     self.no_price_label.config(text="Down: Fail", foreground='red')  
@@ -2034,11 +2033,11 @@ class CryptoTrader:
                             # 设置 Yes5和No5价格为0.85
                             self.yes5_price_entry = self.yes_frame.grid_slaves(row=8, column=1)[0]
                             self.yes5_price_entry.delete(0, tk.END)
-                            self.yes5_price_entry.insert(0, "0.98")
+                            self.yes5_price_entry.insert(0, "0.8")
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
-                            self.no5_price_entry.insert(0, "0.52")
+                            self.no5_price_entry.insert(0, "0.51")
                             self.no5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.buy_yes4_amount = float(self.yes4_amount_entry.get())
                             # 增加交易次数
@@ -2087,11 +2086,11 @@ class CryptoTrader:
                             # 设置 Yes5和No5价格为0.98
                             self.yes5_price_entry = self.yes_frame.grid_slaves(row=8, column=1)[0]
                             self.yes5_price_entry.delete(0, tk.END)
-                            self.yes5_price_entry.insert(0, "0.52")
+                            self.yes5_price_entry.insert(0, "0.51")
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
-                            self.no5_price_entry.insert(0, "0.98")
+                            self.no5_price_entry.insert(0, "0.8")
                             self.no5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.buy_no4_amount = float(self.no4_amount_entry.get())
                             # 增加交易次数
@@ -3074,7 +3073,7 @@ class CryptoTrader:
         """安排每天0点2分执行自动找币"""
         now = datetime.now()
         # 计算下一个0点2分的时间
-        next_run = now.replace(hour=3, minute=2, second=0, microsecond=0)
+        next_run = now.replace(hour=0, minute=20, second=0, microsecond=0)
         if now >= next_run:
             next_run += timedelta(days=1)
         
