@@ -1120,6 +1120,7 @@ class CryptoTrader:
                         self.update_status(f"价格数据格式错误")
                 else:
                     self.logger.warning("无法获取价格数据")
+                    
                     self.driver.refresh()
                     self.yes_price_label.config(text="Up: Fail", foreground='red')
                     self.no_price_label.config(text="Down: Fail", foreground='red')  
@@ -1314,7 +1315,7 @@ class CryptoTrader:
             self.no4_entry.insert(0, f"{self.yes4_amount:.2f}")
 
             # 获取当前CASH并显示,此CASH再次点击start按钮时会更新
-            current_cash = base_amount / initial_percent
+            current_cash = float(base_amount / initial_percent)
             self.cash_label_value.config(text=current_cash)
             self.logger.info("\033[34m✅ YES/NO 金额设置完成\033[0m")
             
