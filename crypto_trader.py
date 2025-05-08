@@ -1039,7 +1039,7 @@ class CryptoTrader:
 
                 # 增加数据验证
                 if asks_number is None or bids_number is None:
-                    self.logger.warning("无法获取到价格数据")
+                    self.logger.debug("无法获取到价格数据")
                     continue
                 try:
                     asks_float = float(asks_number)
@@ -1054,7 +1054,9 @@ class CryptoTrader:
                 time.sleep(1)  # 稍等一下再试
                 continue
             except Exception as e:
-                self.logger.error(f"其他异常: {e}")
+                self.logger.debug(f"其他异常: {e}")
+                self.driver.refresh()
+                time.sleep(2)
                 if attempt < retry_times - 1:
                     time.sleep(2)
                     continue            
@@ -2234,15 +2236,16 @@ class CryptoTrader:
         """重置交易"""
         # 在所有操作完成后,重置交易
         time.sleep(2)
-        
         self.set_yes_no_cash()
-        # 重置Yes1和No1价格为0.53
+        
         if (self.yes5_target_price == 0.98) or (self.no5_target_price == 0.98):
             self.reset_trade_count = 0
-        self.reset_trade_count += 1
+        else:
+            self.reset_trade_count += 1
         
         self.sell_count = 0
         self.trade_count = 0
+        # 重置Yes1和No1价格为0.53
         self.set_yes_no_default_target_price()
         self.reset_count_label.config(text=str(self.reset_trade_count))
         self.logger.info(f"第\033[32m{self.reset_trade_count}\033[0m次重置交易")
