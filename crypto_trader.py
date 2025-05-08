@@ -990,7 +990,7 @@ class CryptoTrader:
         except Exception as e:
             self.logger.error(f"自动修复失败: {e}")
     
-    def get_nearby_cents(self, retry_times=3):
+    def get_nearby_cents(self, retry_times=2):
         for attempt in range(retry_times):
             try:
                 # 重新定位 Spread 元素
@@ -1056,9 +1056,8 @@ class CryptoTrader:
             except Exception as e:
                 self.logger.error(f"其他异常: {e}")
                 if attempt < retry_times - 1:
-                    time.sleep(1)
-                    continue
-                
+                    time.sleep(2)
+                    continue            
                 break
         return None, None
 
@@ -1120,7 +1119,7 @@ class CryptoTrader:
                         self.update_status(f"价格数据格式错误")
                 else:
                     self.logger.warning("无法获取价格数据")
-                    self.driver.refresh()
+                    
                     self.yes_price_label.config(text="Up: Fail", foreground='red')
                     self.no_price_label.config(text="Down: Fail", foreground='red')  
             except Exception as e:
@@ -1315,7 +1314,7 @@ class CryptoTrader:
 
             # 获取当前CASH并显示,此CASH再次点击start按钮时会更新
             current_cash = float(base_amount / initial_percent)
-            self.cash_label_value.config(text=current_cash)
+            self.cash_label_value.config(text=f"{current_cash:.2f}")
             self.logger.info("\033[34m✅ YES/NO 金额设置完成\033[0m")
             
         except Exception as e:
@@ -2033,7 +2032,7 @@ class CryptoTrader:
                             # 设置 Yes5和No5价格为0.85
                             self.yes5_price_entry = self.yes_frame.grid_slaves(row=8, column=1)[0]
                             self.yes5_price_entry.delete(0, tk.END)
-                            self.yes5_price_entry.insert(0, "0.8")
+                            self.yes5_price_entry.insert(0, "0.98")
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
@@ -2090,7 +2089,7 @@ class CryptoTrader:
                             self.yes5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.no5_price_entry = self.no_frame.grid_slaves(row=8, column=1)[0]
                             self.no5_price_entry.delete(0, tk.END)
-                            self.no5_price_entry.insert(0, "0.8")
+                            self.no5_price_entry.insert(0, "0.98")
                             self.no5_price_entry.configure(foreground='red')  # 添加红色设置
                             self.buy_no4_amount = float(self.no4_amount_entry.get())
                             # 增加交易次数
@@ -3073,7 +3072,7 @@ class CryptoTrader:
         """安排每天0点2分执行自动找币"""
         now = datetime.now()
         # 计算下一个0点2分的时间
-        next_run = now.replace(hour=0, minute=20, second=0, microsecond=0)
+        next_run = now.replace(hour=4, minute=2, second=0, microsecond=0)
         if now >= next_run:
             next_run += timedelta(days=1)
         
@@ -3200,7 +3199,6 @@ class CryptoTrader:
                         WebDriverWait(self.driver, 5).until(
                             EC.presence_of_element_located((By.XPATH, first_xpath))
                         )
-                        self.logger.info(f"✅ {attr} 定位成功: {first_xpath}")
                     except (TimeoutException, NoSuchElementException):
                         self.logger.warning(f"❌ {attr} 定位失败: {first_xpath}")
                         failed_xpaths.append((attr, first_xpath))
