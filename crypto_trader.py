@@ -104,7 +104,7 @@ class CryptoTrader:
         self.url_check_timer = None
         # 添加登录状态监控定时器
         self.login_check_timer = None
-
+        
         # 添加URL and refresh_page监控锁
         self.url_monitoring_lock = threading.Lock()
         self.refresh_page_lock = threading.Lock()
@@ -900,7 +900,7 @@ class CryptoTrader:
                 try:
                     self.check_balance()
                     self.check_prices()
-                    time.sleep(1)
+                    time.sleep(2)
                 except Exception as e:
                     if not self.stop_event.is_set():  # 仅在未停止时记录错误
                         self.logger.error(f"监控失败: {str(e)}")
@@ -991,6 +991,7 @@ class CryptoTrader:
             self.logger.error(f"自动修复失败: {e}")
     
     def get_nearby_cents(self, retry_times=2):
+        """获取spread附近的价格数字"""
         for attempt in range(retry_times):
             try:
                 # 重新定位 Spread 元素
@@ -1055,13 +1056,21 @@ class CryptoTrader:
                 continue
             except Exception as e:
                 self.logger.debug(f"其他异常: {e}")
-                self.driver.refresh()
                 time.sleep(2)
                 if attempt < retry_times - 1:
                     time.sleep(2)
                     continue            
                 break
         return None, None
+
+    def is_time_0_3(self):
+        """
+        判断当前时间是否在凌晨0点到3点之间
+        Returns:
+            bool: 如果当前时间在0:00-3:00之间返回True,否则返回False
+        """
+        current_hour = datetime.now().hour
+        return 0 <= current_hour <= 3
 
     def check_prices(self):
         """检查价格变化"""
@@ -1120,20 +1129,16 @@ class CryptoTrader:
                         self.logger.error(f"价格计算错误: {ValueError}")
                         self.update_status(f"价格数据格式错误")
                 else:
-                    self.logger.warning("无法获取价格数据")
-                    
                     self.yes_price_label.config(text="Up: Fail", foreground='red')
                     self.no_price_label.config(text="Down: Fail", foreground='red')  
             except Exception as e:
-                self.logger.error(f"价格检查失败: {str(e)}")
-                self.update_status(f"价格检查失败: {str(e)}")
                 self.yes_price_label.config(text="Up: Fail", foreground='red')
                 self.no_price_label.config(text="Down: Fail", foreground='red')
                 self.root.after(3000, self.check_prices)
         except Exception as e:
             self.logger.error(f"检查价格主流程失败: {str(e)}")
             time.sleep(1)
-
+            
     def check_balance(self):
         """获取Portfolio和Cash值"""
         try:
@@ -2232,24 +2237,6 @@ class CryptoTrader:
         finally:
             self.trading = False
 
-    def reset_trade(self):
-        """重置交易"""
-        # 在所有操作完成后,重置交易
-        time.sleep(2)
-        self.set_yes_no_cash()
-        
-        if (self.yes5_target_price == 0.98) or (self.no5_target_price == 0.98):
-            self.reset_trade_count = 0
-        else:
-            self.reset_trade_count += 1
-        
-        self.sell_count = 0
-        self.trade_count = 0
-        # 重置Yes1和No1价格为0.53
-        self.set_yes_no_default_target_price()
-        self.reset_count_label.config(text=str(self.reset_trade_count))
-        self.logger.info(f"第\033[32m{self.reset_trade_count}\033[0m次重置交易")
-
     def only_sell_yes(self):
         """只卖出YES"""
         
@@ -2950,6 +2937,10 @@ class CryptoTrader:
                 self.root.after_cancel(self.refresh_timer)
                 self.refresh_timer = None
 
+            if hasattr(self, 'monitor_prices_timer'):
+                self.root.after_cancel(self.monitor_prices_timer)  # 取消定时器
+                self.monitor_prices_timer = None
+
         except Exception as e:
             self.logger.error(f"停止监控失败: {str(e)}")
 
@@ -3070,22 +3061,6 @@ class CryptoTrader:
                 time.sleep(retry_delay)
                 self.driver.refresh()
         return False
-        
-    def schedule_00_02_change_url(self):
-        """安排每天0点2分执行自动找币"""
-        now = datetime.now()
-        # 计算下一个0点2分的时间
-        next_run = now.replace(hour=4, minute=2, second=0, microsecond=0)
-        if now >= next_run:
-            next_run += timedelta(days=1)
-        
-        # 计算等待时间(毫秒)
-        wait_time = (next_run - now).total_seconds() * 1000
-        wait_time_hours = wait_time / 3600000
-
-        # 设置定时器
-        self.root.after(int(wait_time), self.change_url)
-        self.logger.info(f"{wait_time_hours} 小时后,开始切换url")
 
     def change_url(self):
         """根据当前时间,修改url"""
@@ -3170,7 +3145,6 @@ class CryptoTrader:
         self.logger.info("没有找到包含元素的 iframe")
         return False
 
-    # 在 CryptoTrader 类中添加方法
     def monitor_xpath_elements(self):
         """使用当前浏览器实例监控 XPath 元素"""
         if not self.driver:
@@ -3239,7 +3213,41 @@ class CryptoTrader:
             # 每隔 30 分钟检查一次,先关闭之前的定时器
             self.root.after_cancel(self.monitor_xpath_timer)
             self.root.after(1800000, self.monitor_xpath_elements)
-    
+
+    def schedule_00_02_change_url(self):
+        """安排每天3点2分执行自动找币"""
+        now = datetime.now()
+        # 计算下一个3点2分的时间
+        next_run = now.replace(hour=3, minute=2, second=0, microsecond=0)
+        if now >= next_run:
+            next_run += timedelta(days=1)
+        
+        # 计算等待时间(毫秒)
+        wait_time = (next_run - now).total_seconds() * 1000
+        wait_time_hours = wait_time / 3600000
+
+        # 设置定时器
+        self.root.after(int(wait_time), self.change_url)
+        self.logger.info(f"{wait_time_hours} 小时后,开始切换url")
+
+    def reset_trade(self):
+        """重置交易"""
+        # 在所有操作完成后,重置交易
+        time.sleep(2)
+        self.set_yes_no_cash()
+        
+        if (self.yes5_target_price == 0.98) or (self.no5_target_price == 0.98):
+            self.reset_trade_count = 0
+        else:
+            self.reset_trade_count += 1
+        
+        self.sell_count = 0
+        self.trade_count = 0
+        # 重置Yes1和No1价格为0.53
+        self.set_yes_no_default_target_price()
+        self.reset_count_label.config(text=str(self.reset_trade_count))
+        self.logger.info(f"第\033[32m{self.reset_trade_count}\033[0m次重置交易")
+
     def run(self):
         """启动程序"""
         try:
