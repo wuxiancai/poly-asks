@@ -63,13 +63,13 @@ class XPathConfig:
 
     # 10.Position-Up标签长期有效
     POSITION_UP_LABEL = [
-        '//div[text()="Up"]',
+        '//div[@class="c-PJLV c-PJLV-igOOgQP-css"]//div[text()="Up"]',
         '//div[@class="c-dhzjXW c-chKWaB c-chKWaB-eVTycx-color-green c-dhzjXW-ibxvuTL-css" and text()="Up"]'
     ]
 
     # 11.Position-Down标签长期有效
     POSITION_DOWN_LABEL = [
-        '//div[text()="Down"]',
+        '//div[@class="c-PJLV c-PJLV-igOOgQP-css"]//div[text()="Down"]',
         '//div[@class="c-dhzjXW c-chKWaB c-chKWaB-kNNGp-color-red c-dhzjXW-ibxvuTL-css" and text()="Down"]'
     ]
 

@@ -2150,6 +2150,8 @@ class CryptoTrader:
                         # 执行卖出YES操作
                         self.only_sell_yes()
                         self.logger.info("卖完 Up 后，再卖 Down")
+                        time.sleep(2)
+                        self.driver.refresh()
                         # 卖 NO 之前先检查是否有 NO 标签
                         if self.find_position_label_no():
                             self.only_sell_no()
@@ -2206,7 +2208,8 @@ class CryptoTrader:
                         # 卖完 Down 后，自动再卖 Up                      
                         self.only_sell_no()
                         self.logger.info("卖完 Down 后，再卖 Up")
-
+                        time.sleep(2)
+                        self.driver.refresh()
                         if self.find_position_label_yes():
                             self.only_sell_yes()
                         else:
@@ -2239,7 +2242,6 @@ class CryptoTrader:
 
     def only_sell_yes(self):
         """只卖出YES"""
-        
         self.position_sell_yes_button.invoke()
         time.sleep(0.5)
         self.sell_confirm_button.invoke()
@@ -2349,9 +2351,9 @@ class CryptoTrader:
             WebDriverWait(self.driver, 10).until(
                 lambda driver: driver.execute_script('return document.readyState') == 'complete'
             )
-            position_value = None
-            position_value = self.find_position_label_yes()
             
+            position_value = self.find_position_label_yes()
+            # position_value 的值是true 或 false
             # 根据position_value的值决定点击哪个按钮
             if position_value:
                 # 如果第一行是Up，点击第二的按钮
@@ -2379,7 +2381,7 @@ class CryptoTrader:
         except Exception as e:
             error_msg = f"点击 Positions-Sell-No 按钮失败: {str(e)}"
             self.logger.error(error_msg)
-            self.update_status(error_msg)
+            
 
     def click_position_sell_yes(self):
         """点击 Positions-Sell-Yes 按钮"""
@@ -2391,10 +2393,11 @@ class CryptoTrader:
             WebDriverWait(self.driver, 10).until(
                 lambda driver: driver.execute_script('return document.readyState') == 'complete'
             )
-            position_value = None
+            
             position_value = self.find_position_label_no()
             
             # 根据position_value的值决定点击哪个按钮
+            
             if position_value:
                 # 如果第二行是No，点击第一行YES 的 SELL的按钮
                 try:
@@ -2421,7 +2424,7 @@ class CryptoTrader:
         except Exception as e:
             error_msg = f"点击 Positions-Sell-Yes 按钮失败: {str(e)}"
             self.logger.error(error_msg)
-            self.update_status(error_msg)
+            
 
     def click_sell_confirm_button(self):
         """点击sell-卖出按钮"""
@@ -2987,20 +2990,19 @@ class CryptoTrader:
                     lambda driver: driver.execute_script('return document.readyState') == 'complete'
                 )
                 
-                # 尝试获取YES标签
+                # 尝试获取Up标签
                 try:
+                    position_label_up = None
                     position_label_up = self.driver.find_element(By.XPATH, XPathConfig.POSITION_UP_LABEL[0])
-                    if position_label_up:
+                    if position_label_up is not None and position_label_up:
                         self.logger.info(f"找到了Up持仓标签: {position_label_up.text}")
                         return True
                     else:
                         self.logger.debug("未找到Up持仓标签")
-                        return False
-                    
+                        return False    
                 except NoSuchElementException:
                     position_label_up = self._find_element_with_retry(XPathConfig.POSITION_UP_LABEL, timeout=3, silent=True)
-
-                    if position_label_up:
+                    if position_label_up is not None and position_label_up:
                         self.logger.info(f"找到了Up持仓标签: {position_label_up.text}")
                         return True
                     else:
@@ -3010,7 +3012,6 @@ class CryptoTrader:
             except TimeoutException:
                 self.logger.debug(f"第{attempt + 1}次尝试未找到UP标签,正常情况!")
             
-                
             if attempt < max_retries - 1:
                 self.logger.info(f"等待{retry_delay}秒后重试...")
                 time.sleep(retry_delay)
@@ -3034,19 +3035,17 @@ class CryptoTrader:
                 
                 # 尝试获取Down标签
                 try:
+                    position_label_down = None
                     position_label_down = self.driver.find_element(By.XPATH, XPathConfig.POSITION_DOWN_LABEL[0])
-                    
-                    if position_label_down:
+                    if position_label_down is not None and position_label_down:
                         self.logger.info(f"找到了Down持仓标签: {position_label_down.text}")
                         return True
                     else:
                         self.logger.debug("未找到Down持仓标签")
                         return False
-                    
                 except NoSuchElementException:
                     position_label_down = self._find_element_with_retry(XPathConfig.POSITION_DOWN_LABEL, timeout=3, silent=True)
-
-                    if position_label_down:
+                    if position_label_down is not None and position_label_down:
                         self.logger.info(f"找到了Down持仓标签: {position_label_down.text}")
                         return True
                     else:
@@ -3236,7 +3235,11 @@ class CryptoTrader:
         time.sleep(2)
         self.set_yes_no_cash()
         
-        if (self.yes5_target_price == 0.98) or (self.no5_target_price == 0.98):
+        # 检查属性是否存在，如果不存在则使用默认值
+        yes5_price = getattr(self, 'yes5_target_price', 0)
+        no5_price = getattr(self, 'no5_target_price', 0)
+
+        if (yes5_price == 0.98) or (no5_price == 0.98):
             self.reset_trade_count = 0
         else:
             self.reset_trade_count += 1
