@@ -138,3 +138,15 @@ class XPathConfig:
     SPREAD = [
         '(//span[@class="c-ggujGL"])[2]'
     ]
+
+    # 23.搜索框长期有效
+    SEARCH_INPUT = [
+        '//input[@id="markets-grid-search-input"]',
+        '/html/body/div[1]/div[2]/div/div/main/div/div/div[3]/div/div/div/div[1]/div[2]/div[2]/input'
+    ] 
+
+    # 24.search_confirm_button长期有效
+    SEARCH_CONFIRM_BUTTON = [
+        '//p[contains(text(), "Up or Down on")]', 
+        '//a//p[contains(text(), "Up or Down on")]' 
+    ]
